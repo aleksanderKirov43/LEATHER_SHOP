@@ -17,9 +17,6 @@ type UserService struct {
 	userRepo repository.User
 }
 
-func NewUserServise(userRepo repository.User) UserService {
-	return UserService{userRepo: userRepo}
-}
 func (us *UserService) GetUserByUsername(username string) (*models.User, error) {
 	return us.userRepo.GetUserByUsername(username)
 }
