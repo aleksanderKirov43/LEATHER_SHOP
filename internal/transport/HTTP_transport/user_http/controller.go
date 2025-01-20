@@ -2,16 +2,18 @@ package user_http
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+
 	"leather-shop/internal/models"
 	"leather-shop/internal/services"
 	"leather-shop/internal/transport/HTTP_transport"
 	"leather-shop/internal/transport/middlewares"
 	"leather-shop/pkg/jwt"
-	"net/http"
-	"strconv"
-	"time"
 )
 
 type userController struct {
@@ -113,31 +115,7 @@ func (uc *userController) GetUsers(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, users)
 }
 
-// // Создаём нового пользователя
-//
-//	func (uc *userController) CreateUser(ctx *gin.Context) {
-//		jwtPayload, jwtPayloadErr := middlewares.GetJWTPayload(ctx)
-//		if jwtPayloadErr != nil {
-//			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Ошибка": jwtPayloadErr.Error()})
-//			return
-//		}
-//
-//		fmt.Println("JWT Payload:", jwtPayload)
-//
-//		var user models.User
-//		if err := ctx.ShouldBindJSON(&user); err != nil {
-//			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
-//			return
-//		}
-//		if err := uc.usersService.CreateUser(&user); err != nil {
-//			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
-//			return
-//		}
-//		ctx.JSON(http.StatusCreated, user)
-//	}
-//
-// Создаем нового пользователя без авторизации
-
+// Создаем нового пользователя
 func (uc *userController) CreateUser(ctx *gin.Context) {
 	var user models.User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
