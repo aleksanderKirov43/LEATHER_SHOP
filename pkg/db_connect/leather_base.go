@@ -2,13 +2,14 @@ package db_connect
 
 import (
 	"fmt"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-	"leather-shop/config"
 	"log"
 	"time"
 
 	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+
+	"leather-shop/config"
 )
 
 func InitDB(config config.DBLeather) *gorm.DB {

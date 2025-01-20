@@ -1,7 +1,7 @@
-FROM golang:1.20 AS build
+FROM golang:1.23 AS build
 
-WORKDIR /cmd
-COPY cmd .
+WORKDIR /app
+COPY . .
 RUN go mod download
 RUN cd /cmd && CGO_ENABLED=0 go build -o ../bin/app
 
@@ -17,4 +17,4 @@ COPY --from=tz /etc/localtime /etc/localtime
 ARG DEPLOY=true
 ENV DEPLOY="${DEPLOY}"
 
-CMD ["/cmd"]
+CMD ["./cmd/main"]

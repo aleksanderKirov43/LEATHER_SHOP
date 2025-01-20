@@ -2,9 +2,11 @@ package jwt
 
 import (
 	"fmt"
-	"github.com/golang-jwt/jwt/v4"
-	"leather-shop/internal/models"
 	"time"
+
+	"github.com/golang-jwt/jwt/v4"
+
+	"leather-shop/internal/models"
 )
 
 // Структура для хранения секретного ключа для подписи и верификации JWT-токенов

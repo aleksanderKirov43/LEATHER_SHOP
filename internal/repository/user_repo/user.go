@@ -3,9 +3,10 @@ package user_repo
 import (
 	"errors"
 	"gorm.io/gorm"
+	"log"
+
 	"leather-shop/internal/models"
 	"leather-shop/internal/repository"
-	"log"
 )
 
 type userRepository struct {

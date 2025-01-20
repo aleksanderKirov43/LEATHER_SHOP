@@ -1,9 +1,11 @@
 package models
 
 import (
-	"github.com/golang-jwt/jwt/v4"
-	"leather-shop/config"
 	"time"
+
+	"github.com/golang-jwt/jwt/v4"
+
+	"leather-shop/config"
 )
 
 // Создаём структуру для хранения токенов доступа

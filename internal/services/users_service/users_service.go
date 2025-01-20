@@ -2,6 +2,7 @@ package users_service
 
 import (
 	"golang.org/x/crypto/bcrypt"
+
 	"leather-shop/internal/models"
 	"leather-shop/internal/repository"
 	"leather-shop/internal/services"

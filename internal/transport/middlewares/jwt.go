@@ -3,13 +3,15 @@ package middlewares
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/gin-gonic/gin"
+
 	"leather-shop/config"
 	"leather-shop/internal/models"
 	"leather-shop/pkg/consts"
 	"leather-shop/pkg/jwt"
-	"net/http"
-	"strings"
 )
 
 type Helper struct {
@@ -17,30 +19,6 @@ type Helper struct {
 	AccessTTL  int
 	RefreshTTL int
 }
-
-func NewHelper(secret string, accessTTL, refreshTTL int) Helper {
-	return Helper{
-		Secret:     secret,
-		AccessTTL:  accessTTL,
-		RefreshTTL: refreshTTL,
-	}
-}
-
-//func (h *Helper) GenerateToken(userId int, username string, ttl time.Duration) (string, error) {
-//	claims := &jwt.MapClaims{
-//		"user_id":  userId,
-//		"username": username,
-//		"exp":      time.Now().Add(ttl).Unix(),
-//	}
-//
-//	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-//	tokenString, err := token.SignedString([]byte(h.Secret))
-//	if err != nil {
-//		return "", err
-//	}
-//
-//	return tokenString, nil
-//}
 
 // Проверяем наличие и валидность JWT-токена в заголовках запроса
 func JwtMiddleware() gin.HandlerFunc {

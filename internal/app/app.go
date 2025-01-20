@@ -2,7 +2,10 @@ package app
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/gin-gonic/gin"
+
 	"leather-shop/config"
 	"leather-shop/internal/repository"
 	"leather-shop/internal/repository/user_repo"
@@ -12,7 +15,6 @@ import (
 	"leather-shop/internal/transport/middlewares"
 	"leather-shop/pkg/db_connect"
 	"leather-shop/pkg/jwt"
-	"log"
 )
 
 type App struct {
