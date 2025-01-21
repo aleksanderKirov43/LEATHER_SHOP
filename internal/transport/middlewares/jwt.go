@@ -3,15 +3,13 @@ package middlewares
 import (
 	"errors"
 	"fmt"
-	"net/http"
-	"strings"
-
 	"github.com/gin-gonic/gin"
-
 	"leather-shop/config"
 	"leather-shop/internal/models"
 	"leather-shop/pkg/consts"
 	"leather-shop/pkg/jwt"
+	"net/http"
+	"strings"
 )
 
 type Helper struct {
@@ -22,12 +20,18 @@ type Helper struct {
 
 // Проверяем наличие и валидность JWT-токена в заголовках запроса
 func JwtMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
+	return func(ctx *gin.Context) {
 		var authErrorCode int
 		var authHeader string
 
-		authHeaderRefresh := c.GetHeader("Authorization-Refresh")
-		authHeaderAccess := c.GetHeader("Authorization")
+		_, jwtPayloadErr := GetJWTPayload(ctx)
+		if jwtPayloadErr != nil {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Ошибка": jwtPayloadErr.Error()})
+			return
+		}
+
+		authHeaderRefresh := ctx.GetHeader("Authorization-Refresh")
+		authHeaderAccess := ctx.GetHeader("Authorization")
 
 		if authHeaderRefresh != "" {
 			authErrorCode = 400
@@ -38,27 +42,27 @@ func JwtMiddleware() gin.HandlerFunc {
 		}
 
 		if authHeader == "" {
-			c.JSON(authErrorCode, gin.H{
+			ctx.JSON(authErrorCode, gin.H{
 				"message": "токен не найден",
 			})
-			c.Abort()
+			ctx.Abort()
 			return
 		}
 
 		headersPair := strings.Split(authHeader, " ")
 		if len(headersPair) != 2 {
-			c.JSON(authErrorCode, gin.H{
+			ctx.JSON(authErrorCode, gin.H{
 				"message": "неверный формат заголовка",
 			})
-			c.Abort()
+			ctx.Abort()
 			return
 		}
 
 		if headersPair[0] != "Bearer" {
-			c.JSON(authErrorCode, gin.H{
+			ctx.JSON(authErrorCode, gin.H{
 				"message": "неверный формат заголовка",
 			})
-			c.Abort()
+			ctx.Abort()
 			return
 		}
 
@@ -69,21 +73,22 @@ func JwtMiddleware() gin.HandlerFunc {
 
 		if err != nil {
 			fmt.Println(err)
-			c.JSON(authErrorCode, gin.H{
+			ctx.JSON(authErrorCode, gin.H{
 				"message": "невалидный токен",
 			})
-			c.Abort()
+			ctx.Abort()
 			return
 		}
 
 		session := helper.ParseMapClaims(payload)
 
-		c.Set(consts.ContextUserSession, session)
+		ctx.Set(consts.ContextUserSession, session)
 
-		c.Next()
+		ctx.Next()
 	}
 }
 
+// Функция извлечения закодированной JWT информации, для аутиндефикации и авторизайции пользователей
 func GetJWTPayload(c *gin.Context) (*models.JWTPayload, error) {
 	ctx := c.Value(consts.ContextUserSession)
 	if ctx == nil {

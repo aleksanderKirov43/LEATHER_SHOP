@@ -27,19 +27,46 @@ func NewHelper(secret string, accessTTL, refreshTTL int) Helper {
 
 // Генерация токена
 func (h *Helper) GenerateToken(userId int, username string, ttl time.Duration) (string, error) {
+	// Создаем claims (утверждения) для токена, включающие идентификатор пользователя, имя пользователя и срок действия токена
 	claims := &jwt.MapClaims{
 		"user_id":  userId,
 		"username": username,
 		"exp":      time.Now().Add(ttl).Unix(),
 	}
-
+	// Создаем новый JWT-токен с заданными claims и методом подписи HS256
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// Подписываем токен с использованием секретного ключа и возвращаем токен в виде строки
 	tokenString, err := token.SignedString([]byte(h.Secret))
 	if err != nil {
 		return "", err
 	}
 	return tokenString, nil
 }
+
+// Функция генерации access / refresh токенов
+func (h *Helper) GenerateAccessAndRefreshTokens(userId int, username string) (string, string, error) {
+	accessToken, err := h.GenerateToken(userId, username, time.Duration(h.AccessTTL)*time.Minute)
+	if err != nil {
+		return "", "", err
+	}
+	refreshToken, err := h.GenerateToken(userId, username, time.Duration(h.RefreshTTL)*time.Minute)
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
+}
+
+//
+//// Функция обновления токенов, если срок действия истек
+//func (h *Helper) RefreshToken(jwtPayload *models.JWTPayload) (string, string, error) {
+//	currentTime := time.Now().Unix()
+//	// Проверка срока действия токенов
+//	if jwtPayload.ExpiresAt.Unix() < currentTime {
+//		return h.GenerateAccessAndRefreshTokens(jwtPayload.Id, jwtPayload.Login)
+//	}
+//	return "", "", nil
+//}
 
 // Парсинг токена
 func (h *Helper) ParseToken(tokenString string) (jwt.MapClaims, error) {

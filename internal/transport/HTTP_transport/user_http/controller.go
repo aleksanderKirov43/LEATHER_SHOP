@@ -1,7 +1,6 @@
 package user_http
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -75,14 +74,6 @@ func (uc *userController) RefreshToken(ctx *gin.Context) {
 
 // Получаем пользователя по ID из параметра запроса
 func (uc *userController) GetUser(ctx *gin.Context) {
-	jwtPayload, jwtPayloadErr := middlewares.GetJWTPayload(ctx)
-	if jwtPayloadErr != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Ошибка": jwtPayloadErr.Error()})
-		return
-	}
-
-	fmt.Println("JWT Payload:", jwtPayload)
-
 	id := ctx.Param("id")
 	userId, err := strconv.Atoi(id) //Преобразуем строковый id в целое число
 	if err != nil {
@@ -99,14 +90,6 @@ func (uc *userController) GetUser(ctx *gin.Context) {
 
 // Получаем всех пользователей, вызывая метода сервиса GetUsers
 func (uc *userController) GetUsers(ctx *gin.Context) {
-	jwtPayload, jwtPayloadErr := middlewares.GetJWTPayload(ctx)
-	if jwtPayloadErr != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Ошибка": jwtPayloadErr.Error()})
-		return
-	}
-
-	fmt.Println("JWT Payload:", jwtPayload)
-
 	users, err := uc.usersService.GetUsers()
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
@@ -147,14 +130,6 @@ func HashPassword(password string) (string, error) {
 
 // Метод для удаления пользователя
 func (uc *userController) DeleteUser(ctx *gin.Context) {
-	jwtPayload, jwtPayloadErr := middlewares.GetJWTPayload(ctx)
-	if jwtPayloadErr != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Ошибка": jwtPayloadErr.Error()})
-		return
-	}
-
-	fmt.Println("JWT Payload:", jwtPayload)
-
 	id := ctx.Param("id")
 	userId, err := strconv.Atoi(id)
 	if err != nil {
@@ -170,14 +145,6 @@ func (uc *userController) DeleteUser(ctx *gin.Context) {
 
 // Метод для редактирования данных пользователя
 func (uc *userController) EditUser(ctx *gin.Context) {
-	jwtPayload, jwtPayloadErr := middlewares.GetJWTPayload(ctx)
-	if jwtPayloadErr != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Ошибка": jwtPayloadErr.Error()})
-		return
-	}
-
-	fmt.Println("JWT Payload:", jwtPayload)
-
 	id := ctx.Param("id")
 	userId, err := strconv.Atoi(id)
 	if err != nil {
