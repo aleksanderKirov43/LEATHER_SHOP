@@ -43,6 +43,16 @@ func (us *usersService) CheckPassword(password, hashedPassword string) bool {
 	return err == nil
 }
 
+// Реализация метода для хеширования пароля
+
+func (us *usersService) HashPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedPassword), nil
+}
+
 // Методы сервиса
 func (us *usersService) GetUser(id int) (*models.User, error) {
 	user, err := us.userRepository.GetUser(id)

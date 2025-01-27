@@ -11,4 +11,5 @@ type User interface {
 	EditUser(user *models.User) error
 	GetUserByUsername(username string) (*models.User, error)
 	CheckPassword(password, hashedPassword string) bool
+	HashPassword(password string) (string, error)
 }

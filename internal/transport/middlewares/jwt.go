@@ -10,12 +10,38 @@ import (
 	"leather-shop/pkg/jwt"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type Helper struct {
 	Secret     string
 	AccessTTL  int
 	RefreshTTL int
+}
+
+func GenerateTokenMiddleware(helper *jwt.Helper) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		userId, _ := ctx.Get("userId")
+		username, _ := ctx.Get("username")
+
+		accessToken, err := helper.GenerateToken(userId.(int), username.(string), time.Duration(helper.AccessTTL)*time.Minute)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"Ошибка": "Не удалось сгенерировать access токен"})
+			ctx.Abort()
+			return
+		}
+
+		refreshToken, err := helper.GenerateToken(userId.(int), username.(string), time.Duration(helper.RefreshTTL)*time.Minute)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"Ошибка": "Не удалось сгенерировать refresh токен"})
+			ctx.Abort()
+			return
+		}
+
+		ctx.Set("accessToken", accessToken)
+		ctx.Set("refreshToken", refreshToken)
+		ctx.Next()
+	}
 }
 
 // Проверяем наличие и валидность JWT-токена в заголовках запроса
@@ -81,9 +107,7 @@ func JwtMiddleware() gin.HandlerFunc {
 		}
 
 		session := helper.ParseMapClaims(payload)
-
 		ctx.Set(consts.ContextUserSession, session)
-
 		ctx.Next()
 	}
 }

@@ -1,12 +1,10 @@
 package user_http
 
 import (
-	"net/http"
-	"strconv"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"net/http"
+	"strconv"
 
 	"leather-shop/internal/models"
 	"leather-shop/internal/services"
@@ -17,11 +15,11 @@ import (
 
 type userController struct {
 	usersService services.User
-	jwtHelper    jwt.Helper
+	jwtHelper    *jwt.Helper
 }
 
 // Создаём новый экземпляр колнтроллера пользователей
-func New(usersService services.User, jwtHelper jwt.Helper) HTTP_transport.UserController {
+func New(usersService services.User, jwtHelper *jwt.Helper) HTTP_transport.UserController {
 	return &userController{
 		usersService: usersService,
 		jwtHelper:    jwtHelper,
@@ -36,6 +34,7 @@ func (uc *userController) Login(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&auth); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"Ошибка": "Ошибка ввода"})
+		return
 	}
 
 	user, err := uc.usersService.GetUserByUsername(auth.Username)
@@ -43,18 +42,16 @@ func (uc *userController) Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"Ошибка": "Неверный логин или пароль"})
 		return
 	}
-	accessToken, err := uc.jwtHelper.GenerateToken(user.Id, user.Username, time.Duration(uc.jwtHelper.AccessTTL)*time.Minute)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"Ошибка": "Не удалось сгенерировать аккес токен"})
-		return
-	}
 
-	refreshToken, err := uc.jwtHelper.GenerateToken(user.Id, user.Username, time.Duration(uc.jwtHelper.RefreshTTL)*time.Minute)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"Ошибка": "Не удалось сгенерировать рефреш токен"})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{"Аккес токен": accessToken, "Рефреш токен": refreshToken})
+	ctx.Set("userId", user.Id)
+	ctx.Set("username", user.Username)
+
+	middlewares.GenerateTokenMiddleware(uc.jwtHelper)(ctx)
+
+	accessToken := ctx.Value("accessToken").(string)
+	refreshToken := ctx.Value("refreshToken").(string)
+
+	ctx.JSON(http.StatusOK, gin.H{"Access токен": accessToken, "Refresh токен": refreshToken})
 }
 
 func (uc *userController) RefreshToken(ctx *gin.Context) {
@@ -64,11 +61,13 @@ func (uc *userController) RefreshToken(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, err := uc.jwtHelper.GenerateToken(jwtPayload.Id, jwtPayload.Login, time.Duration(uc.jwtHelper.AccessTTL)*time.Minute)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"Ошибка": "Не удалось сгенеритровать аккес токен"})
-		return
-	}
+	ctx.Set("userId", jwtPayload.Id)
+	ctx.Set("username", jwtPayload.Login)
+
+	middlewares.GenerateTokenMiddleware(uc.jwtHelper)(ctx)
+
+	accessToken := ctx.Value("accessToken").(string)
+
 	ctx.JSON(http.StatusOK, gin.H{"Аккес токен": accessToken})
 }
 
@@ -160,12 +159,12 @@ func (uc *userController) EditUser(ctx *gin.Context) {
 
 	// Хеширование пароля, если он был изменён
 	if user.Password != "" {
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		hashedPassword, err := uc.usersService.HashPassword(user.Password)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": "Не удалось захешировать пароль"})
 			return
 		}
-		user.Password = string(hashedPassword)
+		user.Password = hashedPassword
 	}
 
 	if err := uc.usersService.EditUser(&user); err != nil {
