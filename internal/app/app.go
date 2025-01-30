@@ -18,9 +18,9 @@ import (
 )
 
 type App struct {
-	userRepository repository.User // Репозиторий для работы с пользователями
-	userService    services.User   // Сервис для бизнес-логики пользователей
-	jwtHelper      jwt.Helper      // Помощник для работы с JWT
+	userRepository repository.User  // Репозиторий для работы с пользователями
+	userService    services.User    // Сервис для бизнес-логики пользователей
+	tokenHandler   jwt.TokenHandler // Помощник для работы с JWT
 
 	cfg *config.Config
 }
@@ -33,13 +33,15 @@ func New(config *config.Config) *App {
 	userService := users_service.New(userRepository)
 
 	// Инициализация jwtHelper
-	jwtHelper := jwt.NewHelper(config.Jwt.Secret, config.Jwt.AccessTTL, config.Jwt.RefreshTTL)
+	//jwtHelper := jwt.NewHelper(config.Jwt.Secret, config.Jwt.AccessTTL, config.Jwt.RefreshTTL)
+
+	tokenHandler := jwt.NewHelper(config.Jwt.Secret, config.Jwt.AccessTTL, config.Jwt.RefreshTTL)
 
 	return &App{
 
 		userRepository: userRepository,
 		userService:    userService,
-		jwtHelper:      jwtHelper,
+		tokenHandler:   tokenHandler,
 		cfg:            config,
 	}
 }
@@ -56,9 +58,9 @@ func (a *App) startHttp() {
 	// Создаём группу маршрутов для /api
 	apiGroup := engine.Group("/api")
 	// Инициализируем контроллер для пользователей
-	userController := user_http.New(a.userService, a.jwtHelper)
+	userController := user_http.New(a.userService, a.tokenHandler)
 
-	user_http.NewRouter(apiGroup, userController)
+	user_http.NewRouter(apiGroup, userController, a.tokenHandler)
 
 	if err := engine.Run(fmt.Sprintf(":%s", a.cfg.ApplicationPort)); err != nil {
 		log.Fatal(err)
