@@ -15,14 +15,15 @@ import (
 
 type userController struct {
 	usersService services.User
-	jwtHelper    *jwt.Helper
+	//jwtHelper    *jwt.Helper
+	tokenHandler jwt.TokenHandler
 }
 
 // Создаём новый экземпляр колнтроллера пользователей
-func New(usersService services.User, jwtHelper *jwt.Helper) HTTP_transport.UserController {
+func New(usersService services.User, tokenHandler jwt.TokenHandler) HTTP_transport.UserController {
 	return &userController{
 		usersService: usersService,
-		jwtHelper:    jwtHelper,
+		tokenHandler: tokenHandler,
 	}
 }
 
@@ -46,7 +47,7 @@ func (uc *userController) Login(ctx *gin.Context) {
 	ctx.Set("userId", user.Id)
 	ctx.Set("username", user.Username)
 
-	middlewares.GenerateTokenMiddleware(uc.jwtHelper)(ctx)
+	middlewares.GenerateTokenMiddleware(uc.tokenHandler)(ctx)
 
 	accessToken := ctx.Value("accessToken").(string)
 	refreshToken := ctx.Value("refreshToken").(string)
@@ -64,7 +65,7 @@ func (uc *userController) RefreshToken(ctx *gin.Context) {
 	ctx.Set("userId", jwtPayload.Id)
 	ctx.Set("username", jwtPayload.Login)
 
-	middlewares.GenerateTokenMiddleware(uc.jwtHelper)(ctx)
+	middlewares.GenerateTokenMiddleware(uc.tokenHandler)(ctx)
 
 	accessToken := ctx.Value("accessToken").(string)
 

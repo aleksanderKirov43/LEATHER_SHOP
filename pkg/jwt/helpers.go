@@ -17,8 +17,8 @@ type Helper struct {
 }
 
 // Создание нового экземпляра Helper
-func NewHelper(secret string, accessTTL, refreshTTL int) Helper {
-	return Helper{
+func NewHelper(secret string, accessTTL, refreshTTL int) *Helper {
+	return &Helper{
 		Secret:     secret,
 		AccessTTL:  accessTTL,
 		RefreshTTL: refreshTTL,
@@ -57,17 +57,6 @@ func (h *Helper) GenerateAccessAndRefreshTokens(userId int, username string) (st
 	return accessToken, refreshToken, nil
 }
 
-//
-//// Функция обновления токенов, если срок действия истек
-//func (h *Helper) RefreshToken(jwtPayload *models.JWTPayload) (string, string, error) {
-//	currentTime := time.Now().Unix()
-//	// Проверка срока действия токенов
-//	if jwtPayload.ExpiresAt.Unix() < currentTime {
-//		return h.GenerateAccessAndRefreshTokens(jwtPayload.Id, jwtPayload.Login)
-//	}
-//	return "", "", nil
-//}
-
 // Парсинг токена
 func (h *Helper) ParseToken(tokenString string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -97,4 +86,10 @@ func (h *Helper) ParseMapClaims(mapClaims jwt.MapClaims) *models.JWTPayload {
 		Id:    int(userIdFloat),
 		Login: mapClaims["username"].(string),
 	}
+}
+
+type TokenHandler interface {
+	GenerateToken(userId int, username string, ttl time.Duration) (string, error)
+	ParseToken(tokenString string) (jwt.MapClaims, error)
+	ParseMapClaims(mapClaims jwt.MapClaims) *models.JWTPayload
 }

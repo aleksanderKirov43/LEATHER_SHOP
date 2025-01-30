@@ -19,19 +19,19 @@ type Helper struct {
 	RefreshTTL int
 }
 
-func GenerateTokenMiddleware(helper *jwt.Helper) gin.HandlerFunc {
+func GenerateTokenMiddleware(tokenHandler jwt.TokenHandler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		userId, _ := ctx.Get("userId")
 		username, _ := ctx.Get("username")
 
-		accessToken, err := helper.GenerateToken(userId.(int), username.(string), time.Duration(helper.AccessTTL)*time.Minute)
+		accessToken, err := tokenHandler.GenerateToken(userId.(int), username.(string), time.Duration(15)*time.Minute)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"Ошибка": "Не удалось сгенерировать access токен"})
 			ctx.Abort()
 			return
 		}
 
-		refreshToken, err := helper.GenerateToken(userId.(int), username.(string), time.Duration(helper.RefreshTTL)*time.Minute)
+		refreshToken, err := tokenHandler.GenerateToken(userId.(int), username.(string), time.Duration(60)*time.Minute)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"Ошибка": "Не удалось сгенерировать refresh токен"})
 			ctx.Abort()
@@ -45,7 +45,7 @@ func GenerateTokenMiddleware(helper *jwt.Helper) gin.HandlerFunc {
 }
 
 // Проверяем наличие и валидность JWT-токена в заголовках запроса
-func JwtMiddleware() gin.HandlerFunc {
+func JwtMiddleware(tokenHandler jwt.TokenHandler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var authErrorCode int
 		var authHeader string
@@ -96,7 +96,6 @@ func JwtMiddleware() gin.HandlerFunc {
 		helper := jwt.NewHelper(appConfig.Jwt.Secret, appConfig.Jwt.AccessTTL, appConfig.Jwt.RefreshTTL)
 
 		payload, err := helper.ParseToken(headersPair[1])
-
 		if err != nil {
 			fmt.Println(err)
 			ctx.JSON(authErrorCode, gin.H{
