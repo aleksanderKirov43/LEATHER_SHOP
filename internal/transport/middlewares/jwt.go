@@ -4,13 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"net/http"
+	"strings"
+	"time"
+
 	"leather-shop/config"
 	"leather-shop/internal/models"
 	"leather-shop/pkg/consts"
 	"leather-shop/pkg/jwt"
-	"net/http"
-	"strings"
-	"time"
 )
 
 type Helper struct {

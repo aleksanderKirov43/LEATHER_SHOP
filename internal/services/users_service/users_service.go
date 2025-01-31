@@ -2,7 +2,6 @@ package users_service
 
 import (
 	"golang.org/x/crypto/bcrypt"
-
 	"leather-shop/internal/models"
 	"leather-shop/internal/repository"
 	"leather-shop/internal/services"
@@ -43,16 +42,6 @@ func (us *usersService) CheckPassword(password, hashedPassword string) bool {
 	return err == nil
 }
 
-// Реализация метода для хеширования пароля
-
-func (us *usersService) HashPassword(password string) (string, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-	return string(hashedPassword), nil
-}
-
 // Методы сервиса
 func (us *usersService) GetUser(id int) (*models.User, error) {
 	user, err := us.userRepository.GetUser(id)
@@ -71,6 +60,12 @@ func (us *usersService) GetUsers() ([]*models.User, error) {
 }
 
 func (us *usersService) CreateUser(user *models.User) error {
+	// Хэширование пароля
+	hashedPassword, err := hashPassword(user.Password)
+	if err != nil {
+		return err
+	}
+	user.Password = hashedPassword
 	return us.userRepository.CreateUser(user)
 }
 
@@ -80,4 +75,13 @@ func (us *usersService) DeleteUser(id int) error {
 
 func (us *usersService) EditUser(user *models.User) error {
 	return us.userRepository.EditUser(user)
+}
+
+// Реализация метода для хеширования пароля
+func hashPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedPassword), nil
 }

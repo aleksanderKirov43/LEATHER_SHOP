@@ -2,7 +2,6 @@ package user_http
 
 import (
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"strconv"
 
@@ -15,7 +14,6 @@ import (
 
 type userController struct {
 	usersService services.User
-	//jwtHelper    *jwt.Helper
 	tokenHandler jwt.TokenHandler
 }
 
@@ -34,13 +32,18 @@ func (uc *userController) Login(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&auth); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"Ошибка": "Ошибка ввода"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"Ошибка": "Не корректный запрос"})
 		return
 	}
 
 	user, err := uc.usersService.GetUserByUsername(auth.Username)
-	if err != nil || !uc.usersService.CheckPassword(auth.Password, user.Password) {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"Ошибка": "Неверный логин или пароль"})
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"Ошибка": "Ошибка сервера!"})
+		return
+	}
+
+	if ok := uc.usersService.CheckPassword(auth.Password, user.Password); !ok {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"Ошибка": "Неверный пароль"})
 		return
 	}
 
@@ -55,6 +58,7 @@ func (uc *userController) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"Access токен": accessToken, "Refresh токен": refreshToken})
 }
 
+// Перенести в мидлвар
 func (uc *userController) RefreshToken(ctx *gin.Context) {
 	jwtPayload, jwtPayloadErr := middlewares.GetJWTPayload(ctx)
 	if jwtPayloadErr != nil {
@@ -105,27 +109,12 @@ func (uc *userController) CreateUser(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
 		return
 	}
-	// Хэширование пароля
-	hashedPassword, err := HashPassword(user.Password)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"Ошибка": "Ошибка при хэшировании пароля"})
-		return
-	}
-	user.Password = hashedPassword
 
 	if err := uc.usersService.CreateUser(&user); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
 		return
 	}
 	ctx.JSON(http.StatusCreated, user)
-}
-
-func HashPassword(password string) (string, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-	return string(hashedPassword), nil
 }
 
 // Метод для удаления пользователя
@@ -158,15 +147,15 @@ func (uc *userController) EditUser(ctx *gin.Context) {
 	}
 	user.Id = userId
 
-	// Хеширование пароля, если он был изменён
-	if user.Password != "" {
-		hashedPassword, err := uc.usersService.HashPassword(user.Password)
-		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": "Не удалось захешировать пароль"})
-			return
-		}
-		user.Password = hashedPassword
-	}
+	// Хеширование пароля, если он был изменён (Перенести)
+	//if user.Password != "" {
+	//	hashedPassword, err := uc.usersService.HashPassword(user.Password)
+	//	if err != nil {
+	//		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": "Не удалось захешировать пароль"})
+	//		return
+	//	}
+	//	user.Password = hashedPassword
+	//}
 
 	if err := uc.usersService.EditUser(&user); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
