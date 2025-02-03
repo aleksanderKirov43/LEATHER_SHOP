@@ -7,11 +7,9 @@ import (
 
 func NewRouterProduct(engine *gin.RouterGroup, controller HTTP_transport.Products) {
 
-	productGroup := engine.Group("/products")
-
-	productGroup.POST("/product", controller.CreateProduct)
-	productGroup.GET("/:id", controller.GetProduct)
-	productGroup.GET("", controller.GetProducts)
-	productGroup.DELETE("/:id", controller.DeleteProduct)
-	productGroup.PUT("/:id", controller.EditProduct)
+	engine.POST("/product", controller.CreateProduct)
+	engine.GET("/:id", controller.GetProduct)
+	engine.GET("", controller.GetProducts)
+	engine.DELETE("/:id", controller.DeleteProduct)
+	engine.PUT("/:id", controller.EditProduct)
 }
