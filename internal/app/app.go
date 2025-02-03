@@ -33,8 +33,6 @@ func New(config *config.Config) *App {
 	userService := users_service.New(userRepository)
 
 	// Инициализация jwtHelper
-	//jwtHelper := jwt.NewHelper(config.Jwt.Secret, config.Jwt.AccessTTL, config.Jwt.RefreshTTL)
-
 	tokenHandler := jwt.NewHelper(config.Jwt.Secret, config.Jwt.AccessTTL, config.Jwt.RefreshTTL)
 
 	return &App{
