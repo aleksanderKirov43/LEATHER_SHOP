@@ -3,10 +3,19 @@ package products_service
 import (
 	"leather-shop/internal/models"
 	"leather-shop/internal/repository"
+	"leather-shop/internal/services"
 )
 
 type productService struct {
-	productService repository.Products
+	productService    repository.Products
+	productRepository repository.Products
+}
+
+// Создаём новый экземпляр сервиса для товаров
+func New(productRepository repository.Products) services.Products {
+	return &productService{
+		productRepository: productRepository,
+	}
 }
 
 func (ps *productService) GetProduct(id int) (*models.Products, error) {

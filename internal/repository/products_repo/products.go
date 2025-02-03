@@ -4,11 +4,19 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"leather-shop/internal/models"
+	"leather-shop/internal/repository"
 	"log"
 )
 
 type productRepository struct {
 	DB *gorm.DB
+}
+
+// Создание нового репозитория для товаров
+func New(DB *gorm.DB) repository.Products {
+	return &productRepository{
+		DB: DB,
+	}
 }
 
 func (pr *productRepository) GetProduct(id int) (*models.Products, error) {
