@@ -147,16 +147,6 @@ func (uc *userController) EditUser(ctx *gin.Context) {
 	}
 	user.Id = userId
 
-	// Хеширование пароля, если он был изменён (Перенести)
-	//if user.Password != "" {
-	//	hashedPassword, err := uc.usersService.HashPassword(user.Password)
-	//	if err != nil {
-	//		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": "Не удалось захешировать пароль"})
-	//		return
-	//	}
-	//	user.Password = hashedPassword
-	//}
-
 	if err := uc.usersService.EditUser(&user); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
 		return

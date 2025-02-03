@@ -46,7 +46,7 @@ func GenerateTokenMiddleware(tokenHandler jwt.TokenHandler) gin.HandlerFunc {
 }
 
 // Проверяем наличие и валидность JWT-токена в заголовках запроса
-func JwtMiddleware(tokenHandler jwt.TokenHandler) gin.HandlerFunc {
+func JwtMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var authErrorCode int
 		var authHeader string
