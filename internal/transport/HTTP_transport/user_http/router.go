@@ -4,11 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"leather-shop/internal/transport/HTTP_transport"
 	"leather-shop/internal/transport/middlewares"
-	"leather-shop/pkg/jwt"
 )
 
 // Создаём группы маршрутов для пользователей
-func NewRouter(engine *gin.RouterGroup, controller HTTP_transport.UserController, tokenHandler jwt.TokenHandler) {
+func NewRouter(engine *gin.RouterGroup, controller HTTP_transport.UserController) {
 	// Группа для маршрутов авторизации
 	authGroup := engine.Group("/auth")
 	{
@@ -21,7 +20,7 @@ func NewRouter(engine *gin.RouterGroup, controller HTTP_transport.UserController
 
 	// Группа маршрутов для пользователей, требующих авторизации
 	usersGroup := engine.Group("/users")
-	usersGroup.Use(middlewares.JwtMiddleware(tokenHandler))
+	usersGroup.Use(middlewares.JwtMiddleware())
 	{
 		usersGroup.GET("/:id", controller.GetUser)
 		usersGroup.GET("", controller.GetUsers)
