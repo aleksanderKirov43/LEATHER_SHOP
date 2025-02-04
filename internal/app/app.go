@@ -48,7 +48,8 @@ func New(config *config.Config) *App {
 		userRepository: userRepository,
 		userService:    userService,
 		tokenHandler:   tokenHandler,
-		cfg:            config,
+
+		cfg: config,
 
 		productRepository: productRepository,
 		productService:    productService,
