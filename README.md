@@ -164,3 +164,109 @@
   "message": "User deleted successfully"
 }
 ```
+
+
+
+### Управление товарами
+
+1. **Создание товара:**
+    - **URL:** `POST /api/products`
+
+    - **Body (raw JSON):**
+```json
+{
+    "name": "Тестовый товар",
+    "description": "Тут должно содержаться описание тестового товара",
+    "quantity": 100,
+    "image": ["http://example.com/image1.jpg", "http://example.com/image2.jpg"],
+    "sale": 10,
+    "price": 4500,
+    "status": 2,
+    "category": 1,
+    "property": 1
+}
+```
+
+**Ответ:**
+```json
+{
+    "id": 1,
+    "name": "Тестовый товар",
+    "description": "Тут должно содержаться описание тестового товара",
+    "quantity": 100,
+    "image": [
+        "http://example.com/image1.jpg",
+        "http://example.com/image2.jpg"
+    ],
+    "sale": 10,
+    "price": 4500,
+    "status": 2,
+    "category": 1,
+    "property": 1
+}
+
+```
+
+**Получение товара по ID:**
+
+- **URL:** `GET /api/products/{id}`
+
+- **Ответ:**
+```json
+{
+    "id": 1,
+    "name": "Тестовый товар",
+    "description": "Тут должно содержаться описание тестового товара",
+    "quantity": 100,
+    "image": [
+        "http://example.com/image1.jpg",
+        "http://example.com/image2.jpg"
+    ],
+    "sale": 10,
+    "price": 4500,
+    "status": 2,
+    "category": 1,
+    "property": 1
+}
+```
+
+**Получение всех товаров:**
+
+- **URL:** `GET /api/products`
+
+*Тут мы просто получаем список всех существующих товаров. Пример не приведён для улучшения читабельности README, что бы не засорять пространство*
+
+**Редактирование товара:**
+
+- **URL:** `PUT /api/products/{id}`
+
+Body (raw JSON):
+```json
+{
+    "id": 1,
+    "name": "Тестовый товар отредактирован",
+    "description": "Описание тестового товара",
+    "quantity": 30,
+    "image": [
+        "http://example.com/image1.jpg",
+        "http://example.com/image2.jpg"
+    ],
+    "sale": 0,
+    "price": 4500,
+    "status": 2,
+    "category": 1,
+    "property": 1
+}
+```
+
+**Удаление товара:**
+
+- **URL:** `DELETE /api/products/{id}`
+
+*Ответ:*
+
+```json
+{
+    "message": "Product deleted successfully"
+}
+```

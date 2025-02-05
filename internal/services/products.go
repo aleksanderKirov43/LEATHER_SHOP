@@ -8,4 +8,6 @@ type Products interface {
 	CreateProduct(product *models.Products) error
 	DeleteProduct(id int) error
 	EditProduct(product *models.Products) error
+	SetImages(image string) (string, error)
+	GetImages(image string) ([]string, error)
 }

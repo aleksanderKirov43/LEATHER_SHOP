@@ -29,6 +29,7 @@ func (pr *productRepository) GetProduct(id int) (*models.Products, error) {
 		log.Println(err)
 		return nil, errors.New("Ошибка запроса в базу")
 	}
+
 	return &product, nil
 }
 
@@ -42,11 +43,14 @@ func (pr *productRepository) GetProducts() ([]*models.Products, error) {
 		log.Println(err)
 		return nil, errors.New("Ошибка запроса в базу")
 	}
+
 	return products, nil
 }
 
 func (pr *productRepository) CreateProduct(product *models.Products) error {
-	err := pr.DB.Table("products").Create(product).Error
+	var err error
+
+	err = pr.DB.Table("products").Create(product).Error
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка создания товара")
@@ -60,7 +64,7 @@ func (pr *productRepository) DeleteProduct(id int) error {
 		log.Println(err)
 		return errors.New("Ошибка удаления товара")
 	}
-	return nil
+	return err
 }
 
 func (pr *productRepository) EditProduct(product *models.Products) error {

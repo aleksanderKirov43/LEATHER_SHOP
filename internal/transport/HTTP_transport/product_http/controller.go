@@ -2,11 +2,12 @@ package product_http
 
 import (
 	"github.com/gin-gonic/gin"
+	"net/http"
+	"strconv"
+
 	"leather-shop/internal/models"
 	"leather-shop/internal/services"
 	"leather-shop/internal/transport/HTTP_transport"
-	"net/http"
-	"strconv"
 )
 
 type productController struct {
@@ -68,7 +69,7 @@ func (pc *productController) DeleteProduct(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
 	}
-	ctx.Status(http.StatusNoContent)
+	ctx.JSON(http.StatusOK, gin.H{"message": "Товар успешно удалён"})
 }
 func (pc *productController) EditProduct(ctx *gin.Context) {
 	id := ctx.Param("id")
