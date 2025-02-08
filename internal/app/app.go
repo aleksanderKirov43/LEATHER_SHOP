@@ -2,8 +2,11 @@ package app
 
 import (
 	"fmt"
+	"leather-shop/internal/repository/category_repo"
 	"leather-shop/internal/repository/products_repo"
+	"leather-shop/internal/services/category_service"
 	"leather-shop/internal/services/products_service"
+	"leather-shop/internal/transport/HTTP_transport/category_http"
 	"leather-shop/internal/transport/HTTP_transport/product_http"
 	"log"
 
@@ -28,6 +31,9 @@ type App struct {
 	productRepository repository.Products //Репозиторий для товаров
 	productService    services.Products   // Сервис бизес-логики для товаров
 	cfg               *config.Config
+
+	categoryRepository repository.Category
+	categoryService    services.Category
 }
 
 func New(config *config.Config) *App {
@@ -39,6 +45,9 @@ func New(config *config.Config) *App {
 
 	productRepository := products_repo.New(DB)
 	productService := products_service.New(productRepository)
+
+	categoryRepository := category_repo.New(DB)
+	categoryService := category_service.New(categoryRepository)
 
 	// Инициализация jwtHelper
 	tokenHandler := jwt.NewHelper(config.Jwt.Secret, config.Jwt.AccessTTL, config.Jwt.RefreshTTL)
@@ -53,6 +62,9 @@ func New(config *config.Config) *App {
 
 		productRepository: productRepository,
 		productService:    productService,
+
+		categoryRepository: categoryRepository,
+		categoryService:    categoryService,
 	}
 }
 
@@ -75,6 +87,10 @@ func (a *App) startHttp() {
 	// Инициализируем контроллер для товаров
 	productController := product_http.New(a.productService)
 	product_http.NewRouterProduct(productGroup, productController)
+
+	categoryGroup := engine.Group("/category")
+	categoryController := category_http.New(a.categoryService)
+	category_http.NewRouterCategory(categoryGroup, categoryController)
 
 	if err := engine.Run(fmt.Sprintf(":%s", a.cfg.ApplicationPort)); err != nil {
 		log.Fatal(err)
