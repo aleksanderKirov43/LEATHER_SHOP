@@ -270,3 +270,6 @@ Body (raw JSON):
     "message": "Product deleted successfully"
 }
 ```
+
+
+### Управление категориями

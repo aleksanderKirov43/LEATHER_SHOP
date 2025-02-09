@@ -5,6 +5,7 @@ import (
 	"leather-shop/internal/models"
 	"leather-shop/internal/services"
 	"leather-shop/internal/transport/HTTP_transport"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -68,7 +69,7 @@ func (cc *categoryController) DeleteCategory(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Товар успешно удалён"})
+	ctx.JSON(http.StatusOK, gin.H{"message": "Категория успешно удалёна"})
 }
 
 func (cc *categoryController) EditCategory(ctx *gin.Context) {
@@ -85,6 +86,8 @@ func (cc *categoryController) EditCategory(ctx *gin.Context) {
 		return
 	}
 	category.Id = categoryId
+
+	log.Printf("Полученная категория: %+v\n", category)
 
 	if err := cc.categoryService.EditCategory(&category); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})

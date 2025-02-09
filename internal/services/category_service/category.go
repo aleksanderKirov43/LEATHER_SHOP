@@ -37,7 +37,7 @@ func (cs *categoryService) CreateCategory(category *models.Category) error {
 }
 
 func (cs *categoryService) DeleteCategory(id int) error {
-	return cs.DeleteCategory(id)
+	return cs.categoryRepository.DeleteCategory(id)
 }
 
 func (cs *categoryService) EditCategory(category *models.Category) error {

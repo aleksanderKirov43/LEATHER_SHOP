@@ -58,13 +58,17 @@ func (cr *categoryRepository) DeleteCategory(id int) error {
 	err := cr.DB.Table("product_category").Where("id = ?", id).Delete(&models.Category{}).Error
 	if err != nil {
 		log.Println(err)
-		return errors.New("Ошибка удаления товара")
+		return errors.New("Ошибка удаления категории")
 	}
 	return err
 }
 
 func (cr *categoryRepository) EditCategory(category *models.Category) error {
-	err := cr.DB.Table("product_category").Where("id =?", category.Id).Updates(category).Error
+	log.Printf("Редактируемая категория: %+v\n", category)
+	err := cr.DB.Table("product_category").Where("id = ?", category.Id).Updates(map[string]interface{}{
+		"name":  category.Name,
+		"props": category.Props,
+	}).Error
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка редактирования категории")
