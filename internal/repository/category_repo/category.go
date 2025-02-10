@@ -32,8 +32,8 @@ func (cr *categoryRepository) GetCategory(id int) (*models.Category, error) {
 }
 
 func (cr *categoryRepository) GetCategories() ([]*models.Category, error) {
-	var categorys []*models.Category
-	err := cr.DB.Table("product_category").Find(&categorys).Error
+	var categories []*models.Category
+	err := cr.DB.Table("product_category").Find(&categories).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("Категории не найдены")
@@ -41,7 +41,7 @@ func (cr *categoryRepository) GetCategories() ([]*models.Category, error) {
 		log.Println(err)
 		return nil, errors.New("Ошибка запроса в базу")
 	}
-	return categorys, nil
+	return categories, nil
 }
 
 func (cr *categoryRepository) CreateCategory(category *models.Category) error {

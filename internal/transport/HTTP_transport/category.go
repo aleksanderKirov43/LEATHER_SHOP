@@ -5,9 +5,9 @@ import (
 )
 
 type Category interface {
-	GetCategory(c *gin.Context)
-	GetCategories(c *gin.Context)
-	CreateCategory(c *gin.Context)
-	DeleteCategory(c *gin.Context)
-	EditCategory(c *gin.Context)
+	GetCategory(ctx *gin.Context)
+	GetCategories(ctx *gin.Context)
+	CreateCategory(ctx *gin.Context)
+	DeleteCategory(ctx *gin.Context)
+	EditCategory(ctx *gin.Context)
 }

@@ -10,7 +10,7 @@ func NewRouterProduct(engine *gin.RouterGroup, controller HTTP_transport.Product
 
 	productGroup := engine.Group("")
 
-	productGroup.POST("/product", controller.CreateProduct)
+	productGroup.POST("", controller.CreateProduct)
 	productGroup.GET("/:id", controller.GetProduct)
 	productGroup.GET("", controller.GetProducts)
 	productGroup.DELETE("/:id", controller.DeleteProduct)

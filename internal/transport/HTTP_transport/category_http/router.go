@@ -8,7 +8,7 @@ import (
 func NewRouterCategory(engine *gin.RouterGroup, cointroller HTTP_transport.Category) {
 	categoryGroup := engine.Group("")
 
-	categoryGroup.POST("/category", cointroller.CreateCategory)
+	categoryGroup.POST("", cointroller.CreateCategory)
 	categoryGroup.GET("/:id", cointroller.GetCategory)
 	categoryGroup.GET("", cointroller.GetCategories)
 	categoryGroup.DELETE("/:id", cointroller.DeleteCategory)
