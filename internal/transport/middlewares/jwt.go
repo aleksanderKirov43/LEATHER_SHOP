@@ -51,12 +51,6 @@ func JwtMiddleware() gin.HandlerFunc {
 		var authErrorCode int
 		var authHeader string
 
-		_, jwtPayloadErr := GetJWTPayload(ctx)
-		if jwtPayloadErr != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Ошибка": jwtPayloadErr.Error()})
-			return
-		}
-
 		authHeaderRefresh := ctx.GetHeader("Authorization-Refresh")
 		authHeaderAccess := ctx.GetHeader("Authorization")
 
@@ -115,8 +109,9 @@ func JwtMiddleware() gin.HandlerFunc {
 // Функция извлечения закодированной JWT информации, для аутиндефикации и авторизайции пользователей
 func GetJWTPayload(c *gin.Context) (*models.JWTPayload, error) {
 	ctx := c.Value(consts.ContextUserSession)
+	//fmt.Println(ctx)
 	if ctx == nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "ошибка верификации сессии"})
+		//c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "ошибка верификации сессии"})
 		return nil, errors.New("ошибка верификации сессии")
 	}
 	jwtPayload := ctx.(*models.JWTPayload)

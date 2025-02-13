@@ -1,6 +1,7 @@
 package user_http
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -60,6 +61,7 @@ func (uc *userController) Login(ctx *gin.Context) {
 
 // Перенести в мидлвар
 func (uc *userController) RefreshToken(ctx *gin.Context) {
+	fmt.Println(ctx)
 	jwtPayload, jwtPayloadErr := middlewares.GetJWTPayload(ctx)
 	if jwtPayloadErr != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"Ошибка": jwtPayloadErr.Error()})

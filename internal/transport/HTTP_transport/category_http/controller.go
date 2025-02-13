@@ -81,8 +81,9 @@ func (cc *categoryController) EditCategory(ctx *gin.Context) {
 	}
 
 	var category models.Category
-	if err := cc.categoryService.EditCategory(&category); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
+
+	if err := ctx.ShouldBindJSON(&category); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
 	}
 	category.Id = categoryId

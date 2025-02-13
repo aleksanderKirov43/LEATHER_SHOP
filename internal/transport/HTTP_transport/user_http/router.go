@@ -2,9 +2,9 @@ package user_http
 
 import (
 	"github.com/gin-gonic/gin"
+	"leather-shop/internal/transport/middlewares"
 
 	"leather-shop/internal/transport/HTTP_transport"
-	"leather-shop/internal/transport/middlewares"
 )
 
 // Создаём группы маршрутов для пользователей

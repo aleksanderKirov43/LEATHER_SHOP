@@ -6,6 +6,6 @@ import (
 
 type Category struct {
 	Id    int             `json:"id" gorm:"primaryKey"`
-	Name  string          `json:"name"`
+	Name  string          `json:"name" gorm:"name"`
 	Props json.RawMessage `json:"props"`
 }

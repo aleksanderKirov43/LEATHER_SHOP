@@ -3,9 +3,10 @@ package category_repo
 import (
 	"errors"
 	"gorm.io/gorm"
+	"log"
+
 	"leather-shop/internal/models"
 	"leather-shop/internal/repository"
-	"log"
 )
 
 type categoryRepository struct {
@@ -20,6 +21,7 @@ func New(DB *gorm.DB) repository.Category {
 
 func (cr *categoryRepository) GetCategory(id int) (*models.Category, error) {
 	var category models.Category
+	//query := "SELECT * FROM product_category WHERE id = $1"
 	err := cr.DB.Table("product_category").Where("id = ?", id).First(&category).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -65,10 +67,7 @@ func (cr *categoryRepository) DeleteCategory(id int) error {
 
 func (cr *categoryRepository) EditCategory(category *models.Category) error {
 	log.Printf("Редактируемая категория: %+v\n", category)
-	err := cr.DB.Table("product_category").Where("id = ?", category.Id).Updates(map[string]interface{}{
-		"name":  category.Name,
-		"props": category.Props,
-	}).Error
+	err := cr.DB.Table("product_category").Where("id = ?", category.Id).Updates(category).Error
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка редактирования категории")
