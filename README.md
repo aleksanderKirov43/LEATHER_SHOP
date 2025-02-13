@@ -21,6 +21,7 @@ JWT_REFRESH_TTL: 90
 ```
 docker-compose -f docker-compose.dev.yaml up                 
 ```
+*При подключении к БД черз свой клиент используйте localhost*
 
 ## API Маршруты
 
