@@ -66,7 +66,6 @@ func (cr *categoryRepository) DeleteCategory(id int) error {
 }
 
 func (cr *categoryRepository) EditCategory(category *models.Category) error {
-	log.Printf("Редактируемая категория: %+v\n", category)
 	err := cr.DB.Table("product_category").Where("id = ?", category.Id).Updates(category).Error
 	if err != nil {
 		log.Println(err)

@@ -131,7 +131,7 @@ func (uc *userController) DeleteUser(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
 	}
-	ctx.Status(http.StatusNoContent)
+	ctx.JSON(http.StatusOK, gin.H{"message": "Пользователь успешно удалён"})
 }
 
 // Метод для редактирования данных пользователя

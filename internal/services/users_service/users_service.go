@@ -74,6 +74,11 @@ func (us *usersService) DeleteUser(id int) error {
 }
 
 func (us *usersService) EditUser(user *models.User) error {
+	hashedPassword, err := hashPassword(user.Password)
+	if err != nil {
+		return err
+	}
+	user.Password = hashedPassword
 	return us.userRepository.EditUser(user)
 }
 
