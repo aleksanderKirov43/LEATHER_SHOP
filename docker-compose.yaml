@@ -7,3 +7,30 @@ services:
     restart: on-failure
     stdin_open: true
     tty: true
+    depends_on:
+      - db
+    environment:
+      - LEATHER_APP_PORT
+      - LEATHER_DB_HOST
+      - LEATHER_DB_PORT
+      - LEATHER_DB_USER
+      - LEATHER_DB_PASSWORD
+      - LEATHER_DB_DATABASE
+      - JWT_SECRET
+      - JWT_ACCESS_TTL
+      - JWT_REFRESH_TTL
+
+  db:
+    image: postgres:latest
+    container_name: "leather-db"
+    environment:
+      POSTGRES_USER: ${LEATHER_DB_USER}
+      POSTGRES_PASSWORD: ${LEATHER_DB_PASSWORD}
+      POSTGRES_DB: ${LEATHER_DB_DATABASE}
+    ports:
+      - "5432:5432"
+    volumes:
+      - leather-db-data:/var/lib/postgresql/data
+
+volumes:
+  leather-db-data:
