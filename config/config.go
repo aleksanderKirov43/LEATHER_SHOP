@@ -29,7 +29,7 @@ type JWTConfig struct {
 }
 
 const localConfigPath = "./config/env/.env"
-const deployConfigPath = "./.env"
+const deployConfigPath = "/app/config/env/.env"
 
 var instance *Config
 var once sync.Once
