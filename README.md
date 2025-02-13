@@ -1,6 +1,26 @@
 # leather-shop
 Ручки для интернет-магазина кожевенных изделий
 
+*Перед тем как собрать и запустить сервис в Docker создайте файл .env по пути /config/env/ со следующими данными:*
+```
+LEATHER_APP_PORT: 8089
+
+LEATHER_DB_HOST: db
+LEATHER_DB_PORT: 5432
+LEATHER_DB_USER: leather
+LEATHER_DB_PASSWORD: ef4t_A7yyU
+LEATHER_DB_DATABASE: leather_base
+JWT_SECRET: zoVqwG_6p7
+JWT_ACCESS_TTL: 20
+JWT_REFRESH_TTL: 90
+
+```
+
+*Далее, что-бы с сервисом можно было работать запускайте docker-compose.dev.yaml, после билда образа, командой:* 
+
+```
+docker-compose -f docker-compose.dev.yaml up                 
+```
 
 ## API Маршруты
 
@@ -267,9 +287,73 @@ Body (raw JSON):
 
 ```json
 {
-    "message": "Product deleted successfully"
+    "message": "Товар успешно удалён"
 }
 ```
 
 
 ### Управление категориями
+
+
+1. **Создание категории:**
+    - **URL:** `POST http://localhost:8089/category`
+
+    - **Body (raw JSON):**
+```json
+{
+  "id": 2,
+  "name": "Кошельки",
+  "props": {
+    "Длина": "120 мм",
+    "Ширина": "100 мм",
+    "Вес": "135 грамм",
+    "Отделений под карты": "3 шт",
+    "Монетница": "Да"
+  }
+}
+```
+
+**Ответ:**
+```json
+{
+  "id": 2,
+  "name": "Кошельки",
+  "props": {
+    "Длина": "120 мм",
+    "Ширина": "100 мм",
+    "Вес": "135 грамм",
+    "Отделений под карты": "3 шт",
+    "Монетница": "Да"
+  }
+}
+
+```
+
+**Получение категории по ID:**
+
+- **URL:** `GET /category/{id}`
+
+
+**Получение всех категорй:**
+
+- **URL:** `GET /category`
+
+*Тут мы просто получаем список всех существующих категорий. Пример не приведён для улучшения читабельности README, что бы не засорять пространство*
+
+**Редактирование категории:**
+
+- **URL:** `PUT /category/{id}`
+
+Body (raw JSON):
+
+**Удаление категории:**
+
+- **URL:** `DELETE /category/{id}`
+
+*Ответ:*
+
+```json
+{
+    "message": "Категория успешно удалена"
+}
+```
