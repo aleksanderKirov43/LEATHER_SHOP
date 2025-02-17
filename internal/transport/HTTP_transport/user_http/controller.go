@@ -112,11 +112,15 @@ func (uc *userController) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	if err := uc.usersService.CreateUser(&user); err != nil {
+	message, createdUser, err := uc.usersService.CreateUser(&user)
+	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusCreated, user)
+	ctx.JSON(http.StatusCreated, gin.H{
+		"message": message,
+		"user":    createdUser,
+	})
 }
 
 // Метод для удаления пользователя

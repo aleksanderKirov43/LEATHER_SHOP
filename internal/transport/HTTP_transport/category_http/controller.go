@@ -1,12 +1,14 @@
 package category_http
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
+
 	"leather-shop/internal/models"
 	"leather-shop/internal/services"
 	"leather-shop/internal/transport/HTTP_transport"
-	"net/http"
-	"strconv"
 )
 
 type categoryController struct {

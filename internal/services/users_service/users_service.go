@@ -2,6 +2,7 @@ package users_service
 
 import (
 	"golang.org/x/crypto/bcrypt"
+
 	"leather-shop/internal/models"
 	"leather-shop/internal/repository"
 	"leather-shop/internal/services"
@@ -59,14 +60,19 @@ func (us *usersService) GetUsers() ([]*models.User, error) {
 	return users, nil
 }
 
-func (us *usersService) CreateUser(user *models.User) error {
+func (us *usersService) CreateUser(user *models.User) (string, *models.User, error) {
 	// Хэширование пароля
 	hashedPassword, err := hashPassword(user.Password)
 	if err != nil {
-		return err
+		return "", nil, err
 	}
 	user.Password = hashedPassword
-	return us.userRepository.CreateUser(user)
+
+	message, createdUser, err := us.userRepository.CreateUser(user)
+	if err != nil {
+		return "", nil, err
+	}
+	return message, createdUser, nil
 }
 
 func (us *usersService) DeleteUser(id int) error {

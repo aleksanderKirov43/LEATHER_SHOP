@@ -1,39 +1,35 @@
 package db_connect
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"github.com/jackc/pgx/v4/pgxpool"
 
 	"leather-shop/config"
 )
 
-func InitDB(config config.DBLeather) *gorm.DB {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Moscow", config.Host, config.User, config.Password, config.Database, config.Port)
-	// Настройка GORM
-	DB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
-	})
+func InitDB(cfg config.DBLeather) *pgxpool.Pool {
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Moscow", cfg.Host, cfg.User, cfg.Password, cfg.Database, cfg.Port)
+
+	config, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
-		log.Fatalf("Ошибка подключения к базе данных: %v", err)
+		log.Fatalf("Не удается разобрать DSN: %v\n", err)
 	}
 
-	// Проверка подключения
-	sqlDB, err := DB.DB()
+	pool, err := pgxpool.ConnectConfig(context.Background(), config)
 	if err != nil {
-		log.Fatalf("Ошибка получения SQL DB: %v", err)
+		log.Fatalf("Не удается подключиться к базе данных: %v", err)
 	}
 
 	// Настройка пула соединений
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(100)
-	sqlDB.SetConnMaxLifetime(30 * time.Minute)
+	pool.Config().MaxConns = 100
+	pool.Config().MaxConnIdleTime = 10 * time.Minute
+	pool.Config().MaxConnLifetime = 30 * time.Minute
 
 	log.Println("Подключение к базе данных успешно установлено.")
 
-	return DB
+	return pool
 }

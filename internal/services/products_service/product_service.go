@@ -1,11 +1,11 @@
 package products_service
 
 import (
+	"encoding/json"
+
 	"leather-shop/internal/models"
 	"leather-shop/internal/repository"
 	"leather-shop/internal/services"
-
-	"encoding/json"
 )
 
 type productService struct {

@@ -3,10 +3,11 @@ package middlewares
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
 
 	"leather-shop/config"
 	"leather-shop/internal/models"
@@ -109,7 +110,6 @@ func JwtMiddleware() gin.HandlerFunc {
 // Функция извлечения закодированной JWT информации, для аутиндефикации и авторизайции пользователей
 func GetJWTPayload(c *gin.Context) (*models.JWTPayload, error) {
 	ctx := c.Value(consts.ContextUserSession)
-	//fmt.Println(ctx)
 	if ctx == nil {
 		//c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "ошибка верификации сессии"})
 		return nil, errors.New("ошибка верификации сессии")

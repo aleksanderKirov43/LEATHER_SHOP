@@ -1,30 +1,34 @@
 package category_repo
 
 import (
+	"context"
 	"errors"
-	"gorm.io/gorm"
 	"log"
+
+	"github.com/jackc/pgx/v4/pgxpool"
 
 	"leather-shop/internal/models"
 	"leather-shop/internal/repository"
 )
 
 type categoryRepository struct {
-	DB *gorm.DB
+	pool *pgxpool.Pool
 }
 
-func New(DB *gorm.DB) repository.Category {
+func New(pool *pgxpool.Pool) repository.Category {
 	return &categoryRepository{
-		DB: DB,
+		pool: pool,
 	}
 }
 
 func (cr *categoryRepository) GetCategory(id int) (*models.Category, error) {
 	var category models.Category
-	//query := "SELECT * FROM product_category WHERE id = $1"
-	err := cr.DB.Table("product_category").Where("id = ?", id).First(&category).Error
+	query := "SELECT * FROM product_category WHERE id = $1"
+	row := cr.pool.QueryRow(context.Background(), query, id)
+
+	err := row.Scan(&category.Id, &category.Name, &category.Props)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if err.Error() == "Таких столбцов не сущесвтует" {
 			return nil, errors.New("Категория не найдена")
 		}
 		log.Println(err)
@@ -35,20 +39,31 @@ func (cr *categoryRepository) GetCategory(id int) (*models.Category, error) {
 
 func (cr *categoryRepository) GetCategories() ([]*models.Category, error) {
 	var categories []*models.Category
-	err := cr.DB.Table("product_category").Find(&categories).Error
+	query := "SELECT * FROM product_category"
+	rows, err := cr.pool.Query(context.Background(), query)
+
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("Категории не найдены")
-		}
 		log.Println(err)
 		return nil, errors.New("Ошибка запроса в базу")
 	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var category models.Category
+		err := rows.Scan(&category.Id, &category.Name, &category.Props)
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("Ошибка обработки записей")
+		}
+		categories = append(categories, &category)
+	}
+
 	return categories, nil
 }
 
 func (cr *categoryRepository) CreateCategory(category *models.Category) error {
-	var err error
-	err = cr.DB.Table("product_category").Create(category).Error
+	query := "INSERT INTO product_category (name, props) VALUES ($1, $2)"
+	_, err := cr.pool.Exec(context.Background(), query, category.Name, category.Props)
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка создания категории")
@@ -57,16 +72,18 @@ func (cr *categoryRepository) CreateCategory(category *models.Category) error {
 }
 
 func (cr *categoryRepository) DeleteCategory(id int) error {
-	err := cr.DB.Table("product_category").Where("id = ?", id).Delete(&models.Category{}).Error
+	query := "DELETE FROM product_category WHERE id=$1"
+	_, err := cr.pool.Exec(context.Background(), query, id)
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка удаления категории")
 	}
-	return err
+	return nil
 }
 
 func (cr *categoryRepository) EditCategory(category *models.Category) error {
-	err := cr.DB.Table("product_category").Where("id = ?", category.Id).Updates(category).Error
+	query := "UPDATE product_category SET name=$1, props=$2 WHERE id=$3"
+	_, err := cr.pool.Exec(context.Background(), query, category.Name, category.Props, category.Id)
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка редактирования категории")

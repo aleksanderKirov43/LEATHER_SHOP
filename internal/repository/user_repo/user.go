@@ -1,44 +1,52 @@
 package user_repo
 
 import (
+	"context"
 	"errors"
-	"gorm.io/gorm"
 	"log"
+
+	"github.com/jackc/pgx/v4/pgxpool"
 
 	"leather-shop/internal/models"
 	"leather-shop/internal/repository"
 )
 
 type userRepository struct {
-	DB *gorm.DB
-}
-
-type UserRepository struct {
-	DB *gorm.DB
-}
-
-func (ur *UserRepository) GetUserByUsername(username string) (*models.User, error) {
-	var user models.User
-	err := ur.DB.Where("username = ?", username).First(&user).Error
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
+	pool *pgxpool.Pool
 }
 
 // Создание нового экземпляра репозитория пользователей
-func New(DB *gorm.DB) repository.User {
+func New(pool *pgxpool.Pool) repository.User {
 	return &userRepository{
-		DB: DB,
+		pool: pool,
 	}
+}
+
+func (ur *userRepository) GetUserByUsername(username string) (*models.User, error) {
+	var user models.User
+	query := "SELECT * FROM users WHERE username = $1"
+	row := ur.pool.QueryRow(context.Background(), query, username)
+
+	err := row.Scan(&user.Id, &user.Firstname, &user.Lastname, &user.Username, &user.Type, &user.Email, &user.Password, &user.Phone, &user.Wishlist, &user.Cart)
+	if err != nil {
+		if err.Error() == "Таких столбцов нет в таблице" {
+			return nil, errors.New("Пользователь не найден")
+		}
+		log.Println(err)
+		return nil, errors.New("Ошибка запроса в базу")
+	}
+	return &user, nil
 }
 
 // Методы репозитория для пользователя
 func (ur *userRepository) GetUser(id int) (*models.User, error) {
 	var user models.User
-	err := ur.DB.Table("users").Where("id = ?", id).First(&user).Error
+	query := "SELECT * FROM users WHERE id = $1"
+	row := ur.pool.QueryRow(context.Background(), query, id)
+
+	err := row.Scan(&user.Id, &user.Firstname, &user.Lastname, &user.Username, &user.Type, &user.Email, &user.Password, &user.Phone, &user.Wishlist, &user.Cart)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if err.Error() == "Таких столбцов нет в таблице" {
 			return nil, errors.New("Пользователь не найден")
 		}
 		log.Println(err)
@@ -49,28 +57,41 @@ func (ur *userRepository) GetUser(id int) (*models.User, error) {
 
 func (ur *userRepository) GetUsers() ([]*models.User, error) {
 	var users []*models.User
-	err := ur.DB.Table("users").Find(&users).Error
+	query := "SELECT * FROM users"
+	rows, err := ur.pool.Query(context.Background(), query)
+
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("Пользователи не найдены")
-		}
 		log.Println(err)
 		return nil, errors.New("Ошибка запроса в базу")
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(&user.Id, &user.Firstname, &user.Lastname, &user.Username, &user.Type, &user.Email, &user.Password, &user.Phone, &user.Wishlist, &user.Cart)
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("Ошибка обработки записей")
+		}
+		users = append(users, &user)
 	}
 	return users, nil
 }
 
-func (ur *userRepository) CreateUser(user *models.User) error {
-	err := ur.DB.Table("users").Create(user).Error
+func (ur *userRepository) CreateUser(user *models.User) (string, *models.User, error) {
+	query := "INSERT INTO users (firstname, lastname, username, type, email, password, phone, wishlist, cart) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id"
+	err := ur.pool.QueryRow(context.Background(), query, user.Firstname, user.Lastname, user.Username, user.Type, user.Email, user.Password, user.Phone, user.Wishlist, user.Cart).Scan(&user.Id)
 	if err != nil {
 		log.Println(err)
-		return errors.New("Ошибка создания пользователя")
+		return "", nil, errors.New("Ошибка создания пользователя")
 	}
-	return nil
+	successMessage := "Пользователь успешно создан"
+	return successMessage, user, nil
 }
 
 func (ur *userRepository) DeleteUser(id int) error {
-	err := ur.DB.Table("users").Where("id = ?", id).Delete(&models.User{}).Error
+	query := "DELETE FROM users WHERE id = $1"
+	_, err := ur.pool.Exec(context.Background(), query, id)
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка удаления пользователя")
@@ -79,19 +100,11 @@ func (ur *userRepository) DeleteUser(id int) error {
 }
 
 func (ur *userRepository) EditUser(user *models.User) error {
-	err := ur.DB.Table("users").Where("id = ?", user.Id).Updates(user).Error
+	query := "UPDATE users SET firstname = $1, lastname = $2, username = $3, type = $4, email = $5, password = $6, phone = $7, wishlist = $8, cart = $9 WHERE id = $10"
+	_, err := ur.pool.Exec(context.Background(), query, user.Firstname, user.Lastname, user.Username, user.Type, user.Email, user.Password, user.Phone, user.Wishlist, user.Cart, user.Id)
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка редактирования данных пользователя")
 	}
 	return nil
-}
-
-func (ur *userRepository) GetUserByUsername(username string) (*models.User, error) {
-	var user models.User
-	err := ur.DB.Where("username = ?", username).First(&user).Error
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
 }

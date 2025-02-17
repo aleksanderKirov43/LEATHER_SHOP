@@ -1,56 +1,70 @@
 package products_repo
 
 import (
+	"context"
 	"errors"
-	"gorm.io/gorm"
+	"log"
+
+	"github.com/jackc/pgx/v4/pgxpool"
+
 	"leather-shop/internal/models"
 	"leather-shop/internal/repository"
-	"log"
 )
 
 type productRepository struct {
-	DB *gorm.DB
+	pool *pgxpool.Pool
 }
 
 // Создание нового репозитория для товаров
-func New(DB *gorm.DB) repository.Products {
+func New(pool *pgxpool.Pool) repository.Products {
 	return &productRepository{
-		DB: DB,
+		pool: pool,
 	}
 }
 
 func (pr *productRepository) GetProduct(id int) (*models.Products, error) {
 	var product models.Products
-	err := pr.DB.Table("products").Where("id = ?", id).First(&product).Error
+	query := "SELECT * FROM products WHERE id = $1"
+	row := pr.pool.QueryRow(context.Background(), query, id)
+
+	err := row.Scan(&product.Id, &product.Name, &product.Description, &product.Quantity, &product.Image, &product.Sale, &product.Price, &product.Status, &product.Category, &product.Property)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if err.Error() == "Таких столбцов не сущесвтует" {
 			return nil, errors.New("Товар не найден")
 		}
 		log.Println(err)
 		return nil, errors.New("Ошибка запроса в базу")
 	}
-
 	return &product, nil
 }
 
 func (pr *productRepository) GetProducts() ([]*models.Products, error) {
 	var products []*models.Products
-	err := pr.DB.Table("products").Find(&products).Error
+	query := "SELECT * FROM products"
+	rows, err := pr.pool.Query(context.Background(), query)
+
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("Товары не найдены")
-		}
 		log.Println(err)
 		return nil, errors.New("Ошибка запроса в базу")
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var product models.Products
+		err := rows.Scan(&product.Id, &product.Name, &product.Description, &product.Quantity, &product.Image, &product.Sale, &product.Price, &product.Status, &product.Category, &product.Property)
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("Ошибка обработки записей")
+		}
+		products = append(products, &product)
 	}
 
 	return products, nil
 }
 
 func (pr *productRepository) CreateProduct(product *models.Products) error {
-	var err error
-
-	err = pr.DB.Table("products").Create(product).Error
+	query := "INSERT INTO products (name, description, quantity, image, sale, price, status, category, property) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
+	_, err := pr.pool.Exec(context.Background(), query, product.Name, product.Description, product.Quantity, product.Image, product.Sale, product.Price, product.Status, product.Category, product.Property)
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка создания товара")
@@ -59,16 +73,18 @@ func (pr *productRepository) CreateProduct(product *models.Products) error {
 }
 
 func (pr *productRepository) DeleteProduct(id int) error {
-	err := pr.DB.Table("products").Where("id = ?", id).Delete(&models.Products{}).Error
+	query := "DELETE FROM products WHERE id=$1"
+	_, err := pr.pool.Exec(context.Background(), query, id)
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка удаления товара")
 	}
-	return err
+	return nil
 }
 
 func (pr *productRepository) EditProduct(product *models.Products) error {
-	err := pr.DB.Table("products").Where("id = ?", product.Id).Updates(product).Error
+	query := "UPDATE products SET name=$1, description=$2, quantity=$3, image=$4, sale=$5, price=$6, status=$7, category=$8, property=$9 WHERE id=$10"
+	_, err := pr.pool.Exec(context.Background(), query, product.Name, product.Description, product.Quantity, product.Image, product.Sale, product.Price, product.Status, product.Category, product.Property, product.Id)
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка редактирования товара")

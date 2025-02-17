@@ -2,21 +2,21 @@ package app
 
 import (
 	"fmt"
-	"leather-shop/internal/repository/category_repo"
-	"leather-shop/internal/repository/products_repo"
-	"leather-shop/internal/services/category_service"
-	"leather-shop/internal/services/products_service"
-	"leather-shop/internal/transport/HTTP_transport/category_http"
-	"leather-shop/internal/transport/HTTP_transport/product_http"
 	"log"
 
 	"github.com/gin-gonic/gin"
 
 	"leather-shop/config"
 	"leather-shop/internal/repository"
+	"leather-shop/internal/repository/category_repo"
+	"leather-shop/internal/repository/products_repo"
 	"leather-shop/internal/repository/user_repo"
 	"leather-shop/internal/services"
+	"leather-shop/internal/services/category_service"
+	"leather-shop/internal/services/products_service"
 	"leather-shop/internal/services/users_service"
+	"leather-shop/internal/transport/HTTP_transport/category_http"
+	"leather-shop/internal/transport/HTTP_transport/product_http"
 	"leather-shop/internal/transport/HTTP_transport/user_http"
 	"leather-shop/internal/transport/middlewares"
 	"leather-shop/pkg/db_connect"

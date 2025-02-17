@@ -1,9 +1,10 @@
 package product_http
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 
 	"leather-shop/internal/models"
 	"leather-shop/internal/services"
