@@ -1,26 +1,6 @@
 # leather-shop
 Ручки для интернет-магазина кожевенных изделий
 
-*Перед тем как собрать и запустить сервис в Docker создайте файл .env по пути /config/env/ со следующими данными:*
-```
-LEATHER_APP_PORT: 8089
-
-LEATHER_DB_HOST: db
-LEATHER_DB_PORT: 5432
-LEATHER_DB_USER: leather
-LEATHER_DB_PASSWORD: ef4t_A7yyU
-LEATHER_DB_DATABASE: leather_base
-JWT_SECRET: zoVqwG_6p7
-JWT_ACCESS_TTL: 20
-JWT_REFRESH_TTL: 90
-
-```
-
-*Далее, что-бы с сервисом можно было работать запускайте docker-compose.dev.yaml, после билда образа, командой:* 
-
-```
-docker-compose -f docker-compose.dev.yaml up                 
-```
 *При подключении к БД черз свой клиент используйте localhost*
 
 ## API Маршруты
