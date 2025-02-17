@@ -21,10 +21,10 @@ func New(pool *pgxpool.Pool) repository.Category {
 	}
 }
 
-func (cr *categoryRepository) GetCategory(id int) (*models.Category, error) {
+func (cr *categoryRepository) GetCategory(ctx context.Context, id int) (*models.Category, error) {
 	var category models.Category
 	query := "SELECT * FROM product_category WHERE id = $1"
-	row := cr.pool.QueryRow(context.Background(), query, id)
+	row := cr.pool.QueryRow(ctx, query, id)
 
 	err := row.Scan(&category.Id, &category.Name, &category.Props)
 	if err != nil {
@@ -37,10 +37,10 @@ func (cr *categoryRepository) GetCategory(id int) (*models.Category, error) {
 	return &category, nil
 }
 
-func (cr *categoryRepository) GetCategories() ([]*models.Category, error) {
+func (cr *categoryRepository) GetCategories(ctx context.Context) ([]*models.Category, error) {
 	var categories []*models.Category
 	query := "SELECT * FROM product_category"
-	rows, err := cr.pool.Query(context.Background(), query)
+	rows, err := cr.pool.Query(ctx, query)
 
 	if err != nil {
 		log.Println(err)
@@ -61,9 +61,9 @@ func (cr *categoryRepository) GetCategories() ([]*models.Category, error) {
 	return categories, nil
 }
 
-func (cr *categoryRepository) CreateCategory(category *models.Category) error {
+func (cr *categoryRepository) CreateCategory(ctx context.Context, category *models.Category) error {
 	query := "INSERT INTO product_category (name, props) VALUES ($1, $2)"
-	_, err := cr.pool.Exec(context.Background(), query, category.Name, category.Props)
+	_, err := cr.pool.Exec(ctx, query, category.Name, category.Props)
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка создания категории")
@@ -71,9 +71,9 @@ func (cr *categoryRepository) CreateCategory(category *models.Category) error {
 	return nil
 }
 
-func (cr *categoryRepository) DeleteCategory(id int) error {
+func (cr *categoryRepository) DeleteCategory(ctx context.Context, id int) error {
 	query := "DELETE FROM product_category WHERE id=$1"
-	_, err := cr.pool.Exec(context.Background(), query, id)
+	_, err := cr.pool.Exec(ctx, query, id)
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка удаления категории")
@@ -81,9 +81,9 @@ func (cr *categoryRepository) DeleteCategory(id int) error {
 	return nil
 }
 
-func (cr *categoryRepository) EditCategory(category *models.Category) error {
+func (cr *categoryRepository) EditCategory(ctx context.Context, category *models.Category) error {
 	query := "UPDATE product_category SET name=$1, props=$2 WHERE id=$3"
-	_, err := cr.pool.Exec(context.Background(), query, category.Name, category.Props, category.Id)
+	_, err := cr.pool.Exec(ctx, query, category.Name, category.Props, category.Id)
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка редактирования категории")

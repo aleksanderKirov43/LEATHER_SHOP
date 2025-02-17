@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -36,7 +37,7 @@ type App struct {
 	categoryService    services.Category
 }
 
-func New(config *config.Config) *App {
+func New(ctx context.Context, config *config.Config) *App {
 	DB := db_connect.InitDB(config.DBLeather) //Инициализация базы данных
 
 	// Инициализация репозитория и сервиса для пользователей
@@ -68,12 +69,12 @@ func New(config *config.Config) *App {
 	}
 }
 
-func (a *App) Run() {
-	a.startHttp()
+func (a *App) Run(ctx context.Context) {
+	a.startHttp(ctx)
 }
 
 // Создание экземпляра Gin и добавляем middleware для CORS.
-func (a *App) startHttp() {
+func (a *App) startHttp(ctx context.Context) {
 	engine := gin.Default()
 	engine.Use(middlewares.CORSMiddleware())
 

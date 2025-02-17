@@ -1,11 +1,15 @@
 package services
 
-import "leather-shop/internal/models"
+import (
+	"context"
+
+	"leather-shop/internal/models"
+)
 
 type Category interface {
-	GetCategory(id int) (*models.Category, error)
-	GetCategories() ([]*models.Category, error)
-	CreateCategory(category *models.Category) error
-	DeleteCategory(id int) error
-	EditCategory(category *models.Category) error
+	GetCategory(ctx context.Context, id int) (*models.Category, error)
+	GetCategories(ctx context.Context) ([]*models.Category, error)
+	CreateCategory(ctx context.Context, category *models.Category) error
+	DeleteCategory(ctx context.Context, id int) error
+	EditCategory(ctx context.Context, category *models.Category) error
 }

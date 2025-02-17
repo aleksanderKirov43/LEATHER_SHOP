@@ -1,6 +1,7 @@
 package products_service
 
 import (
+	"context"
 	"encoding/json"
 
 	"leather-shop/internal/models"
@@ -36,30 +37,30 @@ func New(productRepository repository.Products) services.Products {
 	}
 }
 
-func (ps *productService) GetProduct(id int) (*models.Products, error) {
-	product, err := ps.productRepository.GetProduct(id)
+func (ps *productService) GetProduct(ctx context.Context, id int) (*models.Products, error) {
+	product, err := ps.productRepository.GetProduct(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	return product, nil
 }
 
-func (ps *productService) GetProducts() ([]*models.Products, error) {
-	products, err := ps.productRepository.GetProducts()
+func (ps *productService) GetProducts(ctx context.Context) ([]*models.Products, error) {
+	products, err := ps.productRepository.GetProducts(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return products, nil
 }
 
-func (ps *productService) CreateProduct(product *models.Products) error {
-	return ps.productRepository.CreateProduct(product)
+func (ps *productService) CreateProduct(ctx context.Context, product *models.Products) error {
+	return ps.productRepository.CreateProduct(ctx, product)
 }
 
-func (ps *productService) DeleteProduct(id int) error {
-	return ps.productRepository.DeleteProduct(id)
+func (ps *productService) DeleteProduct(ctx context.Context, id int) error {
+	return ps.productRepository.DeleteProduct(ctx, id)
 }
 
-func (ps *productService) EditProduct(product *models.Products) error {
-	return ps.productRepository.EditProduct(product)
+func (ps *productService) EditProduct(ctx context.Context, product *models.Products) error {
+	return ps.productRepository.EditProduct(ctx, product)
 }

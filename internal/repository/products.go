@@ -1,11 +1,15 @@
 package repository
 
-import "leather-shop/internal/models"
+import (
+	"context"
+
+	"leather-shop/internal/models"
+)
 
 type Products interface {
-	GetProduct(id int) (*models.Products, error)
-	GetProducts() ([]*models.Products, error)
-	CreateProduct(product *models.Products) error
-	DeleteProduct(id int) error
-	EditProduct(product *models.Products) error
+	GetProduct(ctx context.Context, id int) (*models.Products, error)
+	GetProducts(ctx context.Context) ([]*models.Products, error)
+	CreateProduct(ctx context.Context, product *models.Products) error
+	DeleteProduct(ctx context.Context, id int) error
+	EditProduct(ctx context.Context, product *models.Products) error
 }

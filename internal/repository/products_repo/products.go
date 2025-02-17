@@ -22,10 +22,10 @@ func New(pool *pgxpool.Pool) repository.Products {
 	}
 }
 
-func (pr *productRepository) GetProduct(id int) (*models.Products, error) {
+func (pr *productRepository) GetProduct(ctx context.Context, id int) (*models.Products, error) {
 	var product models.Products
 	query := "SELECT * FROM products WHERE id = $1"
-	row := pr.pool.QueryRow(context.Background(), query, id)
+	row := pr.pool.QueryRow(ctx, query, id)
 
 	err := row.Scan(&product.Id, &product.Name, &product.Description, &product.Quantity, &product.Image, &product.Sale, &product.Price, &product.Status, &product.Category, &product.Property)
 	if err != nil {
@@ -38,10 +38,10 @@ func (pr *productRepository) GetProduct(id int) (*models.Products, error) {
 	return &product, nil
 }
 
-func (pr *productRepository) GetProducts() ([]*models.Products, error) {
+func (pr *productRepository) GetProducts(ctx context.Context) ([]*models.Products, error) {
 	var products []*models.Products
 	query := "SELECT * FROM products"
-	rows, err := pr.pool.Query(context.Background(), query)
+	rows, err := pr.pool.Query(ctx, query)
 
 	if err != nil {
 		log.Println(err)
@@ -62,9 +62,9 @@ func (pr *productRepository) GetProducts() ([]*models.Products, error) {
 	return products, nil
 }
 
-func (pr *productRepository) CreateProduct(product *models.Products) error {
+func (pr *productRepository) CreateProduct(ctx context.Context, product *models.Products) error {
 	query := "INSERT INTO products (name, description, quantity, image, sale, price, status, category, property) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
-	_, err := pr.pool.Exec(context.Background(), query, product.Name, product.Description, product.Quantity, product.Image, product.Sale, product.Price, product.Status, product.Category, product.Property)
+	_, err := pr.pool.Exec(ctx, query, product.Name, product.Description, product.Quantity, product.Image, product.Sale, product.Price, product.Status, product.Category, product.Property)
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка создания товара")
@@ -72,9 +72,9 @@ func (pr *productRepository) CreateProduct(product *models.Products) error {
 	return nil
 }
 
-func (pr *productRepository) DeleteProduct(id int) error {
+func (pr *productRepository) DeleteProduct(ctx context.Context, id int) error {
 	query := "DELETE FROM products WHERE id=$1"
-	_, err := pr.pool.Exec(context.Background(), query, id)
+	_, err := pr.pool.Exec(ctx, query, id)
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка удаления товара")
@@ -82,9 +82,9 @@ func (pr *productRepository) DeleteProduct(id int) error {
 	return nil
 }
 
-func (pr *productRepository) EditProduct(product *models.Products) error {
+func (pr *productRepository) EditProduct(ctx context.Context, product *models.Products) error {
 	query := "UPDATE products SET name=$1, description=$2, quantity=$3, image=$4, sale=$5, price=$6, status=$7, category=$8, property=$9 WHERE id=$10"
-	_, err := pr.pool.Exec(context.Background(), query, product.Name, product.Description, product.Quantity, product.Image, product.Sale, product.Price, product.Status, product.Category, product.Property, product.Id)
+	_, err := pr.pool.Exec(ctx, query, product.Name, product.Description, product.Quantity, product.Image, product.Sale, product.Price, product.Status, product.Category, product.Property, product.Id)
 	if err != nil {
 		log.Println(err)
 		return errors.New("Ошибка редактирования товара")
