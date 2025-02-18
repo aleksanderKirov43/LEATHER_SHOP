@@ -2,9 +2,10 @@ package user_http
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 
 	"leather-shop/internal/models"
 	"leather-shop/internal/services"
@@ -37,7 +38,7 @@ func (uc *userController) Login(ctx *gin.Context) {
 		return
 	}
 
-	user, err := uc.usersService.GetUserByUsername(auth.Username)
+	user, err := uc.usersService.GetUserByUsername(ctx, auth.Username)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"Ошибка": "Ошибка сервера!"})
 		return
@@ -86,7 +87,7 @@ func (uc *userController) GetUser(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
 	}
-	user, err := uc.usersService.GetUser(userId) // вызов метода сервиса GetUsers
+	user, err := uc.usersService.GetUser(ctx, userId) // вызов метода сервиса GetUsers
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
@@ -96,7 +97,7 @@ func (uc *userController) GetUser(ctx *gin.Context) {
 
 // Получаем всех пользователей, вызывая метода сервиса GetUsers
 func (uc *userController) GetUsers(ctx *gin.Context) {
-	users, err := uc.usersService.GetUsers()
+	users, err := uc.usersService.GetUsers(ctx)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
@@ -112,7 +113,7 @@ func (uc *userController) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	message, createdUser, err := uc.usersService.CreateUser(&user)
+	message, createdUser, err := uc.usersService.CreateUser(ctx, &user)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
 		return
@@ -131,7 +132,7 @@ func (uc *userController) DeleteUser(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
 	}
-	if err := uc.usersService.DeleteUser(userId); err != nil {
+	if err := uc.usersService.DeleteUser(ctx, userId); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
 	}
@@ -153,7 +154,7 @@ func (uc *userController) EditUser(ctx *gin.Context) {
 	}
 	user.Id = userId
 
-	if err := uc.usersService.EditUser(&user); err != nil {
+	if err := uc.usersService.EditUser(ctx, &user); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
 		return
 	}

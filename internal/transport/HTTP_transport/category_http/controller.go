@@ -29,7 +29,7 @@ func (cc *categoryController) GetCategory(ctx *gin.Context) {
 		return
 	}
 
-	category, err := cc.categoryService.GetCategory(categoryId)
+	category, err := cc.categoryService.GetCategory(ctx, categoryId)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
@@ -38,7 +38,7 @@ func (cc *categoryController) GetCategory(ctx *gin.Context) {
 }
 
 func (cc *categoryController) GetCategories(ctx *gin.Context) {
-	categories, err := cc.categoryService.GetCategories()
+	categories, err := cc.categoryService.GetCategories(ctx)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
@@ -52,7 +52,7 @@ func (cc *categoryController) CreateCategory(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
 	}
 
-	if err := cc.categoryService.CreateCategory(&category); err != nil {
+	if err := cc.categoryService.CreateCategory(ctx, &category); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
 	}
 	ctx.JSON(http.StatusOK, category)
@@ -66,7 +66,7 @@ func (cc *categoryController) DeleteCategory(ctx *gin.Context) {
 		return
 	}
 
-	if err := cc.categoryService.DeleteCategory(categoryId); err != nil {
+	if err = cc.categoryService.DeleteCategory(ctx, categoryId); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
 	}
@@ -83,13 +83,13 @@ func (cc *categoryController) EditCategory(ctx *gin.Context) {
 
 	var category models.Category
 
-	if err := ctx.ShouldBindJSON(&category); err != nil {
+	if err = ctx.ShouldBindJSON(&category); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
 	}
 	category.Id = categoryId
 
-	if err := cc.categoryService.EditCategory(&category); err != nil {
+	if err = cc.categoryService.EditCategory(ctx, &category); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
 		return
 	}

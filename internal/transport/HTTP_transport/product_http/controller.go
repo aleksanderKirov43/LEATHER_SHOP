@@ -29,7 +29,7 @@ func (pc *productController) GetProduct(ctx *gin.Context) {
 		return
 	}
 
-	product, err := pc.productService.GetProduct(productId)
+	product, err := pc.productService.GetProduct(ctx, productId)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
@@ -37,7 +37,7 @@ func (pc *productController) GetProduct(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, product)
 }
 func (pc *productController) GetProducts(ctx *gin.Context) {
-	products, err := pc.productService.GetProducts()
+	products, err := pc.productService.GetProducts(ctx)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
@@ -51,7 +51,7 @@ func (pc *productController) CreateProduct(ctx *gin.Context) {
 		return
 	}
 
-	if err := pc.productService.CreateProduct(&product); err != nil {
+	if err := pc.productService.CreateProduct(ctx, &product); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
 	}
 
@@ -66,7 +66,7 @@ func (pc *productController) DeleteProduct(ctx *gin.Context) {
 		return
 	}
 
-	if err := pc.productService.DeleteProduct(productId); err != nil {
+	if err = pc.productService.DeleteProduct(ctx, productId); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
 	}
@@ -81,13 +81,13 @@ func (pc *productController) EditProduct(ctx *gin.Context) {
 	}
 
 	var product models.Products
-	if err := ctx.ShouldBindJSON(&product); err != nil {
+	if err = ctx.ShouldBindJSON(&product); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
 		return
 	}
 	product.Id = productId
 
-	if err := pc.productService.EditProduct(&product); err != nil {
+	if err = pc.productService.EditProduct(ctx, &product); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
 		return
 	}
