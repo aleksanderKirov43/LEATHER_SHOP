@@ -1,0 +1,95 @@
+package product_http
+
+import (
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+
+	"leather-shop/internal/models"
+	"leather-shop/internal/services"
+	"leather-shop/internal/transport/HTTP_transport"
+)
+
+type productController struct {
+	productService services.Products
+}
+
+func New(productService services.Products) HTTP_transport.Products {
+	return &productController{
+		productService: productService,
+	}
+}
+
+func (pc *productController) GetProduct(ctx *gin.Context) {
+	id := ctx.Param("id")
+	productId, err := strconv.Atoi(id)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
+		return
+	}
+
+	product, err := pc.productService.GetProduct(ctx, productId)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, product)
+}
+func (pc *productController) GetProducts(ctx *gin.Context) {
+	products, err := pc.productService.GetProducts(ctx)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, products)
+}
+func (pc *productController) CreateProduct(ctx *gin.Context) {
+	var product models.Products
+	if err := ctx.ShouldBindJSON(&product); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
+		return
+	}
+
+	if err := pc.productService.CreateProduct(ctx, &product); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
+	}
+
+	ctx.JSON(http.StatusOK, product)
+
+}
+func (pc *productController) DeleteProduct(ctx *gin.Context) {
+	id := ctx.Param("id")
+	productId, err := strconv.Atoi(id)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
+		return
+	}
+
+	if err = pc.productService.DeleteProduct(ctx, productId); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Товар успешно удалён"})
+}
+func (pc *productController) EditProduct(ctx *gin.Context) {
+	id := ctx.Param("id")
+	productId, err := strconv.Atoi(id)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
+		return
+	}
+
+	var product models.Products
+	if err = ctx.ShouldBindJSON(&product); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Ошибка": err.Error()})
+		return
+	}
+	product.Id = productId
+
+	if err = pc.productService.EditProduct(ctx, &product); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Ошибка": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, product)
+}
